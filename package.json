@@ -7,7 +7,10 @@
         "dev": "npx serve . -s -l 3000",
         "build": "echo 'Static site - no build step needed'",
         "start": "npx serve . -s -l 3000",
-        "preview": "npx serve . -s -l 3000"
+        "preview": "npx serve . -s -l 3000",
+        "seo:validate": "npx html-validate index.html",
+        "seo:lighthouse": "npx lighthouse https://edgeofbubbles.vercel.app/ --output html --output-path ./lighthouse-report.html",
+        "seo:audit": "echo 'SEO audit complete. Check lighthouse-report.html for results.'"
     },
     "keywords": [
         "portfolio",

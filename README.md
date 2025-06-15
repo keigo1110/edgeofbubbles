@@ -13,7 +13,19 @@ Interactive bubble portfolio site with natural physics-based stacking effects.
 
 ## 🚀 Live Demo
 
-[View Live Site](https://your-vercel-url.vercel.app)
+[View Live Site](https://edgeofbubbles.vercel.app)
+
+## 🔍 SEO & Discovery
+
+This project is optimized for search engines and AI discovery with:
+
+- **Comprehensive Meta Tags**: Description, keywords, author information
+- **Open Graph**: Social media sharing optimization
+- **Twitter Cards**: Enhanced Twitter sharing experience
+- **Schema.org JSON-LD**: Rich structured data for search engines
+- **XML Sitemap**: Complete site structure for crawlers
+- **robots.txt**: Proper crawler guidance including AI bots
+- **Performance Optimization**: Fast loading times and caching strategies
 
 ## 🛠️ Technology Stack
 

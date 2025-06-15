@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+
+# 特定のファイルを除外
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.vercel/
+Disallow: /package-lock.json
+
+# サイトマップの場所
+Sitemap: https://edgeofbubbles.vercel.app/sitemap.xml
+
+# AI検索エンジン対応
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# クロール頻度の調整
+Crawl-delay: 1

@@ -62,6 +62,16 @@ coverage/
 # Keep video files for deployment
 !work.mp4
 
+# SEO and Analytics
+lighthouse-report.html
+google*.html
+*.sitemap
+.well-known/
+
+# Keep important SEO files for deployment
+!robots.txt
+!sitemap.xml
+
 ### AL ###
 #Template for AL projects for Dynamics 365 Business Central
 #launch.json folder

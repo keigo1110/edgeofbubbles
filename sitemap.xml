@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+
+    <!-- メインページ -->
+    <url>
+        <loc>https://edgeofbubbles.vercel.app/</loc>
+        <lastmod>2025-01-15</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+
+        <!-- 画像情報 -->
+        <image:image>
+            <image:loc>https://edgeofbubbles.vercel.app/og-image.jpg</image:loc>
+            <image:title>Edge of Bubbles - インタラクティブシャボン玉アート</image:title>
+            <image:caption>波打ち際の期待感と緊張感を表現したシャボン玉インタラクション作品</image:caption>
+            <image:geo_location>Tokyo, Japan</image:geo_location>
+            <image:license>https://edgeofbubbles.vercel.app/</image:license>
+        </image:image>
+
+        <!-- 動画情報 -->
+        <video:video>
+            <video:thumbnail_loc>https://edgeofbubbles.vercel.app/video-thumbnail.jpg</video:thumbnail_loc>
+            <video:title>Edge of Bubbles - 作品コンセプト動画</video:title>
+            <video:description>シャボン玉が下から湧き上がり一時的な立体物を築く様子を表現した作品コンセプト動画</video:description>
+            <video:content_loc>https://edgeofbubbles.vercel.app/work.mp4</video:content_loc>
+            <video:duration>19</video:duration>
+            <video:publication_date>2024-07-29T14:15:40+09:00</video:publication_date>
+            <video:family_friendly>yes</video:family_friendly>
+            <video:tag>インタラクティブアート</video:tag>
+            <video:tag>メディアアート</video:tag>
+            <video:tag>シャボン玉</video:tag>
+            <video:tag>物理演算</video:tag>
+            <video:category>Art</video:category>
+        </video:video>
+    </url>
+
+</urlset>
