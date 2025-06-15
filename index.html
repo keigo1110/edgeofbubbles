@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge of Bubbles - Natural Bubble Stack</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #0a0e27, #1a1f3a);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* メインコンテンツ */
+        .content {
+            position: relative;
+            z-index: 10;
+            padding: 50px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            pointer-events: none;
+            /* デフォルトでは無効化 */
+        }
+
+        /* テキスト要素のみクリック可能にする */
+        .content h1,
+        .content h2,
+        .content p,
+        .content .video-section,
+        .content .portfolio-item,
+        .creators-section,
+        .creators-section *,
+        .footer,
+        .footer * {
+            pointer-events: auto;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 50px;
+            opacity: 0.8;
+        }
+
+        .video-section {
+            max-width: 800px;
+            margin: 0 auto 50px;
+            text-align: center;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .concept-video {
+            width: 100%;
+            height: auto;
+            display: block;
+            background: #000;
+        }
+
+        .concept-section {
+            max-width: 800px;
+            margin: 0 auto 50px;
+            text-align: center;
+        }
+
+        .concept-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .concept-text:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 制作者セクション */
+        .creators-section {
+            max-width: 900px;
+            margin: 60px auto 50px;
+            text-align: center;
+        }
+
+        .creators-title {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .creators-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 30px;
+            padding: 0 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 大画面では横1列レイアウトも選択可能 */
+        @media (min-width: 1200px) {
+            .creators-grid {
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: 1fr;
+                max-width: 1000px;
+                gap: 25px;
+            }
+
+            .creator-card {
+                min-height: 140px;
+            }
+        }
+
+        .creator-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px 20px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 120px;
+        }
+
+        .creator-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(200, 220, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .creator-card:hover::before {
+            opacity: 1;
+        }
+
+        .creator-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(200, 220, 255, 0.3);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.2),
+                0 0 30px rgba(200, 220, 255, 0.15);
+        }
+
+        .creator-name {
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .creator-link-text {
+            font-size: 0.85rem;
+            color: rgba(200, 220, 255, 0.8);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .creator-card:hover .creator-link-text {
+            opacity: 1;
+            color: rgba(200, 220, 255, 1);
+        }
+
+        /* フッター */
+        .footer {
+            position: relative;
+            z-index: 10;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 100px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .team-link {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .team-link:hover {
+            opacity: 1;
+            color: rgba(200, 220, 255, 1);
+            text-shadow: 0 0 10px rgba(200, 220, 255, 0.5);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .portfolio-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* シャボン玉コンテナ */
+        .bubble-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* シャボン玉 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: auto;
+            cursor: pointer;
+            background: radial-gradient(ellipse at center,
+                    rgba(255, 255, 255, 0.25) 0%,
+                    rgba(200, 220, 255, 0.15) 30%,
+                    rgba(150, 200, 255, 0.1) 60%,
+                    rgba(100, 150, 255, 0.05) 100%);
+            box-shadow:
+                inset -15px -15px 30px rgba(255, 255, 255, 0.2),
+                inset 15px 15px 30px rgba(150, 200, 255, 0.1),
+                0 0 25px rgba(200, 220, 255, 0.15);
+            transition: transform 0.3s ease;
+            animation: squeeze-up 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), gentle-wobble 6s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 25%;
+            width: 25%;
+            height: 25%;
+            background: radial-gradient(ellipse at center,
+                    rgba(255, 255, 255, 0.8) 0%,
+                    rgba(255, 255, 255, 0.4) 50%,
+                    rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            transform: rotate(-20deg);
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            right: 25%;
+            width: 15%;
+            height: 15%;
+            background: radial-gradient(ellipse at center,
+                    rgba(200, 220, 255, 0.6) 0%,
+                    rgba(200, 220, 255, 0) 70%);
+            border-radius: 50%;
+        }
+
+        /* 出現アニメーション - ムニュッと押し出される */
+        @keyframes squeeze-up {
+            0% {
+                transform: scaleY(0.2) scaleX(1.3) translateY(100px);
+                opacity: 0;
+                filter: blur(8px);
+            }
+
+            15% {
+                transform: scaleY(0.4) scaleX(1.2) translateY(50px);
+                opacity: 0.5;
+                filter: blur(4px);
+            }
+
+            40% {
+                transform: scaleY(0.8) scaleX(1.1) translateY(20px);
+                opacity: 0.9;
+                filter: blur(2px);
+            }
+
+            60% {
+                transform: scaleY(1.3) scaleX(0.85) translateY(-10px);
+                opacity: 1;
+                filter: blur(0);
+            }
+
+            75% {
+                transform: scaleY(0.9) scaleX(1.1) translateY(2px);
+            }
+
+            90% {
+                transform: scaleY(1.05) scaleX(0.97) translateY(-2px);
+            }
+
+            100% {
+                transform: scaleY(1) scaleX(1) translateY(0);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        /* ゆらゆら揺れる */
+        @keyframes gentle-wobble {
+
+            0%,
+            100% {
+                transform: translateX(0) rotate(-1deg);
+            }
+
+            25% {
+                transform: translateX(-5px) rotate(1deg);
+            }
+
+            75% {
+                transform: translateX(5px) rotate(-1deg);
+            }
+        }
+
+        /* ホバー時のプルプル */
+        .bubble:hover {
+            animation: jiggle 0.4s ease-in-out;
+        }
+
+        @keyframes jiggle {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            25% {
+                transform: scale(1.15) rotate(-3deg);
+            }
+
+            50% {
+                transform: scale(0.9) rotate(3deg);
+            }
+
+            75% {
+                transform: scale(1.05) rotate(-1deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* ポップアニメーション */
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            40% {
+                transform: scale(1.8);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        .bubble.popping {
+            animation: pop 0.5s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* 自然消滅 */
+        @keyframes natural-fade {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .bubble.fading {
+            animation: natural-fade 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* 押し上げられる時のアニメーション */
+        @keyframes push-up {
+            0% {
+                transform: scaleY(1) scaleX(1);
+            }
+
+            30% {
+                transform: scaleY(0.9) scaleX(1.1);
+            }
+
+            60% {
+                transform: scaleY(1.1) scaleX(0.95);
+            }
+
+            100% {
+                transform: scaleY(1) scaleX(1);
+            }
+        }
+
+        .bubble.pushing {
+            animation: push-up 0.8s ease-out;
+        }
+
+        /* 落下時の動き */
+        @keyframes drop-bounce {
+            0% {
+                transform: scaleY(1) scaleX(1);
+            }
+
+            40% {
+                transform: scaleY(1.2) scaleX(0.85);
+            }
+
+            60% {
+                transform: scaleY(0.9) scaleX(1.1);
+            }
+
+            80% {
+                transform: scaleY(1.05) scaleX(0.98);
+            }
+
+            100% {
+                transform: scaleY(1) scaleX(1);
+            }
+        }
+
+        .bubble.dropping {
+            animation: drop-bounce 0.8s ease-out;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .video-section {
+                margin: 0 auto 30px;
+                max-width: 95%;
+                border-radius: 15px;
+            }
+
+            .concept-section {
+                margin: 0 auto 30px;
+                padding: 0 20px;
+            }
+
+            .concept-text {
+                font-size: 1rem;
+                line-height: 1.6;
+                letter-spacing: 0.3px;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer {
+                padding: 30px 20px;
+                margin-top: 60px;
+            }
+
+            .copyright,
+            .team-link {
+                font-size: 0.8rem;
+            }
+
+            .creators-section {
+                margin: 40px auto 30px;
+            }
+
+            .creators-title {
+                font-size: 1.3rem;
+                margin-bottom: 30px;
+            }
+
+            .creators-grid {
+                grid-template-columns: repeat(1, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                gap: 20px;
+                padding: 0 20px;
+                max-width: 320px;
+            }
+
+            .creator-card {
+                padding: 25px 15px;
+                min-height: 100px;
+            }
+
+            .creator-name {
+                font-size: 1rem;
+            }
+
+            .creator-link-text {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bubble-container" id="bubbleContainer"></div>
+
+    <div class="content">
+        <h1>Edge of Bubbles</h1>
+        <p class="subtitle">波、泡沫、鼓動</p>
+        <div class="video-section">
+            <video class="concept-video" autoplay loop muted playsinline>
+                <source src="work.mp4" type="video/mp4">
+                お使いのブラウザはvideoタグに対応していません。
+            </video>
+        </div>
+
+        <div class="concept-section">
+            <h2>コンセプト</h2>
+            <p class="concept-text">
+                <br />シャボン玉が下から湧き上がり、一時的な立体物を築く。<br>
+                生成と消滅が繰り返される中、互いに触れ合いそうで触れ合わない様子には、<br>
+                波打ち際の期待感と緊張感が漂い、予期せぬ動きが心地よい驚きをもたらす。<br>
+            </p>
+            <p class="concept-text">
+                波打ち際のように揺れ動く曖味な境界は、<br>
+                向こうへの欲求とここにある名残の調和を取り続けている。<br>
+            </p>
+        </div>
+
+        <div class="creators-section">
+            <h2 class="creators-title">制作者</h2>
+            <div class="creators-grid">
+                <a href="https://sites.google.com/view/soraoka" target="_blank" rel="noopener noreferrer"
+                    class="creator-card">
+                    <div class="creator-name">岡空来</div>
+                    <div class="creator-link-text">Profile →</div>
+                </a>
+                <a href="https://kanassi.info/" target="_blank" rel="noopener noreferrer" class="creator-card">
+                    <div class="creator-name">金澤政宜</div>
+                    <div class="creator-link-text">Profile →</div>
+                </a>
+                <a href="https://yuki-nakata.org/" target="_blank" rel="noopener noreferrer" class="creator-card">
+                    <div class="creator-name">中田裕紀</div>
+                    <div class="creator-link-text">Profile →</div>
+                </a>
+                <a href="https://keigominamida.com/" target="_blank" rel="noopener noreferrer" class="creator-card">
+                    <div class="creator-name">南田桂吾</div>
+                    <div class="creator-link-text">Profile →</div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="copyright" id="copyright">
+                © <span id="currentYear"></span> 4ZIGEN All Rights Reserved.
+            </div>
+            <div class="team-info">
+                <a href="https://4zigenhp.vercel.app/" target="_blank" rel="noopener noreferrer" class="team-link">
+                    制作チームのホームページ @https://4zigenhp.vercel.app/
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 現在の年を設定
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // 制作者カードをランダムに並び替える（4ZIGENらしい仕掛け）
+        function shuffleCreators() {
+            const grid = document.querySelector('.creators-grid');
+            if (!grid) return;
+
+            const cards = Array.from(grid.children);
+
+            // シャッフル前にアニメーション準備
+            cards.forEach(card => {
+                card.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                card.style.transform = 'scale(0.95) rotateY(90deg)';
+                card.style.opacity = '0.7';
+            });
+
+            // 少し遅延してからシャッフル
+            setTimeout(() => {
+                // Fisher-Yates シャッフル
+                for (let i = cards.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [cards[i], cards[j]] = [cards[j], cards[i]];
+                }
+
+                // DOM要素を新しい順序で再配置
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        grid.appendChild(card);
+                        // アニメーション復帰
+                        card.style.transform = 'scale(1) rotateY(0deg)';
+                        card.style.opacity = '1';
+                    }, index * 100);
+                });
+
+                // アニメーション完了後にtransitionをリセット
+                setTimeout(() => {
+                    cards.forEach(card => {
+                        card.style.transition = 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    });
+                }, 1000);
+            }, 300);
+        }
+
+        // ページ読み込み時とリサイズ時にランダム化
+        window.addEventListener('load', shuffleCreators);
+
+        // たまにランダムに並び替える（30秒〜60秒間隔）
+        setInterval(() => {
+            if (Math.random() < 0.3) { // 30%の確率
+                shuffleCreators();
+            }
+        }, 30000 + Math.random() * 30000);
+
+        const bubbleContainer = document.getElementById('bubbleContainer');
+        const bubbles = [];
+        let lastInteractionTime = Date.now();
+        const gravity = 0.5;
+        const friction = 0.99;
+
+        class Bubble {
+            constructor() {
+                // ランダムなサイズ（20px～120px）
+                this.size = Math.random() * 100 + 20;
+                this.x = Math.random() * (window.innerWidth - this.size);
+                this.y = window.innerHeight + this.size; // 画面下の外から開始
+                this.vy = 0;
+                this.settled = false;
+                this.element = null;
+                this.popped = false;
+
+                // 色のバリエーション
+                const hue = Math.random() * 60 + 200; // 青〜紫系
+                this.color = `hsla(${hue}, 70%, 70%, 0.15)`;
+
+                this.createElement();
+                // 少し遅延してから位置を探す（アニメーション後）
+                setTimeout(() => this.findRestingPosition(), 800);
+            }
+
+            createElement() {
+                this.element = document.createElement('div');
+                this.element.className = 'bubble';
+                this.element.style.width = this.size + 'px';
+                this.element.style.height = this.size + 'px';
+                this.element.style.left = this.x + 'px';
+                this.element.style.bottom = '-' + this.size + 'px'; // 画面外から開始
+
+                // 色のバリエーションを適用
+                this.element.style.background = `radial-gradient(ellipse at center,
+                    rgba(255, 255, 255, 0.3) 0%,
+                    ${this.color} 40%,
+                    rgba(100, 150, 255, 0.05) 100%)`;
+
+                // サイズに応じてアニメーション速度を調整
+                const animDuration = 4 + Math.random() * 4;
+                this.element.style.animationDuration = `1.5s, ${animDuration}s`;
+                this.element.style.animationDelay = `0s, 1.5s`; // wobbleは出現後から開始
+
+                bubbleContainer.appendChild(this.element);
+
+                // イベントリスナー
+                this.element.addEventListener('mouseenter', () => this.pop());
+                this.element.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.pop();
+                });
+            }
+
+            findRestingPosition() {
+                // 下から押し上げる動作
+                const bubblesToPush = [];
+
+                // この新しいバブルの範囲内にある既存バブルを検出
+                for (let other of bubbles) {
+                    if (other === this || other.popped) continue;
+
+                    // X軸で重なっているかチェック
+                    const xOverlap = !(this.x + this.size < other.x || this.x > other.x + other.size);
+
+                    if (xOverlap) {
+                        // このバブルの真上または重なる位置にあるものを記録
+                        bubblesToPush.push(other);
+                    }
+                }
+
+                // 押し上げる量を計算
+                if (bubblesToPush.length > 0) {
+                    // Y座標でソート（下から順に）
+                    bubblesToPush.sort((a, b) => b.y - a.y);
+
+                    // 各バブルを押し上げる
+                    let pushAmount = this.size * 0.9; // 少し重なるように
+
+                    bubblesToPush.forEach((bubble, index) => {
+                        // 押し上げアニメーションクラスを追加
+                        bubble.element.classList.add('pushing');
+
+                        // アニメーション付きで押し上げ
+                        bubble.y -= pushAmount;
+                        bubble.element.style.transition = 'bottom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                        setTimeout(() => {
+                            bubble.element.style.bottom = (window.innerHeight - bubble.y - bubble.size) + 'px';
+                        }, 100 + index * 50); // 段階的に押し上げ
+
+                        // アニメーション終了後にクラスを削除
+                        setTimeout(() => {
+                            bubble.element.classList.remove('pushing');
+                        }, 800);
+                    });
+                }
+
+                // 新しいバブルを底に配置
+                this.y = window.innerHeight - this.size;
+                this.element.style.transition = 'bottom 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                setTimeout(() => {
+                    this.element.style.bottom = '0px';
+                }, 50);
+                this.settled = true;
+            }
+
+            pop() {
+                if (this.popped) return;
+                this.popped = true;
+                lastInteractionTime = Date.now();
+
+                this.element.classList.add('popping');
+
+                setTimeout(() => {
+                    this.element.remove();
+                    const index = bubbles.indexOf(this);
+                    if (index > -1) {
+                        bubbles.splice(index, 1);
+                    }
+                    // 上のバブルを落下させる
+                    dropBubblesAbove(this.x, this.y, this.size);
+                }, 500);
+            }
+
+            naturalPop() {
+                if (this.popped) return;
+                this.popped = true;
+
+                this.element.classList.add('fading');
+
+                setTimeout(() => {
+                    this.element.remove();
+                    const index = bubbles.indexOf(this);
+                    if (index > -1) {
+                        bubbles.splice(index, 1);
+                    }
+                    dropBubblesAbove(this.x, this.y, this.size);
+                }, 1000);
+            }
+
+            updatePosition() {
+                if (this.popped || this.settled) return;
+
+                this.vy += gravity;
+                this.vy *= friction;
+                this.y += this.vy;
+
+                // 地面または他のバブルとの衝突チェック
+                if (this.y >= window.innerHeight - this.size) {
+                    this.y = window.innerHeight - this.size;
+                    this.settled = true;
+                }
+
+                this.element.style.bottom = (window.innerHeight - this.y - this.size) + 'px';
+            }
+        }
+
+        // 特定の位置の上にあるバブルを落下させる
+        function dropBubblesAbove(x, y, size) {
+            // 消えたバブルの上にあるバブルを探す（y値が小さい = より上）
+            const bubblesAbove = bubbles.filter(b => {
+                if (b.popped) return false;
+
+                // y値が小さい = より上にある
+                if (b.y >= y) return false;
+
+                // X軸で重なっているか
+                const xOverlap = !(b.x + b.size < x || b.x > x + size);
+                return xOverlap;
+            });
+
+            // 落下させるバブルをソート（上から順に）
+            bubblesAbove.sort((a, b) => b.y - a.y);
+
+            // 上にあるバブルを落下させる
+            bubblesAbove.forEach((bubble, index) => {
+                // 落下先の位置を計算（最下部から開始）
+                let newY = window.innerHeight - bubble.size;
+
+                // 他のバブルとの衝突をチェック
+                for (let other of bubbles) {
+                    if (other === bubble || other.popped) continue;
+
+                    // 落下先より上にあるバブルをチェック
+                    const xOverlap = !(bubble.x + bubble.size < other.x || bubble.x > other.x + other.size);
+                    if (xOverlap && other.y > bubble.y) {
+                        // 他のバブルの上に乗る位置を計算
+                        const possibleY = other.y - bubble.size * 0.9;
+                        // 最も高い着地点を選択
+                        if (possibleY < newY && possibleY > bubble.y) {
+                            newY = possibleY;
+                        }
+                    }
+                }
+
+                // 現在位置より下にしか落ちない
+                if (newY > bubble.y) {
+                    // 落下アニメーション
+                    setTimeout(() => {
+                        bubble.element.classList.add('dropping');
+                        bubble.y = newY;
+                        bubble.element.style.transition = 'bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                        bubble.element.style.bottom = (window.innerHeight - bubble.y - bubble.size) + 'px';
+
+                        // アニメーション終了後にクラスを削除
+                        setTimeout(() => {
+                            bubble.element.classList.remove('dropping');
+                        }, 800);
+                    }, index * 100); // 連鎖的に落下
+                }
+            });
+        }
+
+        // 新しいバブルを生成
+        function createBubble() {
+            // 画面の高さの80%まで埋まったら生成を制限
+            const highestBubble = bubbles.reduce((min, b) =>
+                (!b.popped && b.y < min) ? b.y : min, window.innerHeight);
+
+            if (highestBubble > window.innerHeight * 0.2) {
+                const bubble = new Bubble();
+                bubbles.push(bubble);
+            }
+        }
+
+        // 自然消滅
+        function naturalPop() {
+            if (Date.now() - lastInteractionTime > 5000 && bubbles.length > 10) {
+                // マウスが動いていない時、たまに消える
+                if (Math.random() < 0.02) {
+                    const activeBubbles = bubbles.filter(b => !b.popped);
+                    if (activeBubbles.length > 0) {
+                        const randomBubble = activeBubbles[Math.floor(Math.random() * activeBubbles.length)];
+                        randomBubble.naturalPop();
+                    }
+                }
+            }
+        }
+
+        // スクロールでバブルを弾く
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            lastInteractionTime = Date.now();
+
+            scrollTimeout = setTimeout(() => {
+                bubbles.forEach(bubble => {
+                    if (!bubble.popped) {
+                        const rect = bubble.element.getBoundingClientRect();
+                        const centerY = window.innerHeight / 2;
+                        const distance = Math.abs(rect.top + rect.height / 2 - centerY);
+
+                        if (distance < 200 && Math.random() < 0.15) {
+                            bubble.pop();
+                        }
+                    }
+                });
+            }, 50);
+        });
+
+        // マウス移動追跡
+        document.addEventListener('mousemove', () => {
+            lastInteractionTime = Date.now();
+        });
+
+        // 定期的にバブルを生成
+        setInterval(() => {
+            if (Math.random() < 0.8) {
+                createBubble();
+            }
+        }, 600);
+
+        // 自然消滅チェック
+        setInterval(naturalPop, 1000);
+
+        // 初期バブル
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(createBubble, i * 300);
+            }
+        }, 500);
+    </script>
+</body>
+
+</html>
